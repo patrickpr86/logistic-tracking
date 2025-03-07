@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  # MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=logistics_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+    ports:
+      - "3306:3306"
+    networks:
+      - logistics-net
+
+  # Kafka + Zookeeper + UI via Landoop
+  kafka:
+    image: landoop/fast-data-dev:latest
+    container_name: landoop_kafka
+    # Variáveis de ambiente específicas do landoop/fast-data-dev
+    environment:
+      # RUNTESTS=0 evita rodar testes internos de network do Landoop
+      RUNTESTS: 0
+      # SAMPLEDATA=1 faz o Landoop criar dados de exemplo no Kafka
+      SAMPLEDATA: 0
+      # Se quiser setar um hostname ou domain custom, utilize KAFKA_ADVERTISED_HOST_NAME ou similar.
+      # Exemplo:
+      # KAFKA_ADVERTISED_HOST_NAME: localhost
+    ports:
+      - "2181:2181"  # Zookeeper
+      - "3030:3030"  # UI do Landoop (Kafka Topics UI, Lenses)
+      - "8081:8081"  # Schema Registry
+      - "8082:8082"  # Kafka REST Proxy
+      - "8083:8083"  # Kafka Connect
+      - "9092:9092"  # Kafka Broker
+    networks:
+      - logistics-net
+
+networks:
+  logistics-net:
+    driver: bridge
