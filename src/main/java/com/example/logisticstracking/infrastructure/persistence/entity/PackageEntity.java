@@ -1,10 +1,11 @@
 package com.example.logisticstracking.infrastructure.persistence.entity;
 
 import com.example.logisticstracking.domain.enumeration.PackageStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 
 @Entity
@@ -17,7 +18,7 @@ import lombok.*;
 public class PackageEntity {
 
     @Id
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private String id;
 
     private String description;
@@ -32,6 +33,13 @@ public class PackageEntity {
     private LocalDateTime deliveredAt;
 
     private boolean isHoliday;
+
+    @Column(length = 1024)
     private String funFact;
     private LocalDateTime estimatedDeliveryDate;
+
+    @OneToMany(mappedBy = "packageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("packageEntity")
+    private List<TrackingEventEntity> trackingEvents = new ArrayList<>();
 }
+

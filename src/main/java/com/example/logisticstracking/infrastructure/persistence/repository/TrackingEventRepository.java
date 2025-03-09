@@ -1,10 +1,16 @@
 package com.example.logisticstracking.infrastructure.persistence.repository;
 
-
 import com.example.logisticstracking.infrastructure.persistence.entity.TrackingEventEntity;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface TrackingEventRepository extends JpaRepository<TrackingEventEntity, Long> {
-    List<TrackingEventEntity> findByPackageId(String packageId);
+import java.util.List;
+import java.util.UUID;
+
+@Repository
+public interface TrackingEventRepository extends JpaRepository<TrackingEventEntity, UUID> {
+
+    List<TrackingEventEntity> findByPackageEntityId(String packageId);
+    List<TrackingEventEntity> findByPackageEntityIdOrderByDateAsc(String packageEntityId);
+
 }

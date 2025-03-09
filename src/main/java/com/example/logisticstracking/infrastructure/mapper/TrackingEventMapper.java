@@ -1,36 +1,39 @@
 package com.example.logisticstracking.infrastructure.mapper;
 
+import com.example.logisticstracking.application.dto.TrackingEventDTO;
 import com.example.logisticstracking.domain.entity.TrackingEvent;
 import com.example.logisticstracking.infrastructure.persistence.entity.TrackingEventEntity;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TrackingEventMapper {
 
 
-    public TrackingEventEntity toEntity(TrackingEvent domain) {
-        if (domain == null) {
-            return null;
-        }
-        return TrackingEventEntity.builder()
-                .id(domain.id())
-                .packageId(domain.packageId())
-                .location(domain.location())
-                .description(domain.description())
-                .date(domain.date())
-                .build();
-    }
-
-    public TrackingEvent toDomain(TrackingEventEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        return new TrackingEvent(
+    public TrackingEventDTO toDTO(TrackingEventEntity entity) {
+        return new TrackingEventDTO(
                 entity.getId(),
-                entity.getPackageId(),
+                entity.getPackageEntity().getId(),
                 entity.getLocation(),
                 entity.getDescription(),
                 entity.getDate()
         );
     }
+
+
+
+    public List<TrackingEvent> toTrackingEventList(List<TrackingEventEntity> entities) {
+        return entities.stream()
+                .map(entity -> new TrackingEvent(
+                        entity.getId(),
+                        entity.getPackageEntity().getId(),
+                        entity.getLocation(),
+                        entity.getDescription(),
+                        entity.getDate()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 }

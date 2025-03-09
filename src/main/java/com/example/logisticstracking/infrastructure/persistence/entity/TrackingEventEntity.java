@@ -1,9 +1,10 @@
 package com.example.logisticstracking.infrastructure.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tracking_events")
@@ -15,11 +16,16 @@ import java.time.LocalDateTime;
 public class TrackingEventEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
+    private UUID id;
 
-    private String packageId;
     private String location;
     private String description;
     private LocalDateTime date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "package_id", nullable = false)
+    @JsonIgnoreProperties("trackingEvents")
+    private PackageEntity packageEntity;
 }

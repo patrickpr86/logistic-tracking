@@ -2,6 +2,7 @@ package com.example.logisticstracking.domain.entity;
 
 import com.example.logisticstracking.domain.enumeration.PackageStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public record Package(
         String funFact,
         LocalDateTime estimatedDeliveryDate,
         List<TrackingEvent> events
-) {
+) implements Serializable {
     public Package {
         events = events != null ? List.copyOf(events) : List.of();
     }

@@ -1,7 +1,7 @@
 package com.example.logisticstracking.application.dto;
 
 import com.example.logisticstracking.domain.enumeration.PackageStatus;
-
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,4 +18,5 @@ public record PackageDetailsDTO(
         String funFact,
         LocalDateTime estimatedDeliveryDate,
         List<TrackingEventDTO> events
-) {}
+) implements Serializable {
+}

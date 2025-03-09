@@ -35,7 +35,15 @@ dependencies {
 
     implementation 'org.springframework.kafka:spring-kafka'
 
-    implementation "mysql:mysql-connector-java:8.0.33"
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.0'
+
+
+    implementation 'mysql:mysql-connector-java:8.0.33'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

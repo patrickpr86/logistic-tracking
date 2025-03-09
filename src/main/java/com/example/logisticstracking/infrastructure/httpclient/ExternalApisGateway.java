@@ -4,16 +4,16 @@ import com.example.logisticstracking.infrastructure.httpclient.dogapi.DogApiClie
 import com.example.logisticstracking.infrastructure.httpclient.dogapi.dto.DogFactResponse;
 import com.example.logisticstracking.infrastructure.httpclient.nagerdate.NagerDateClient;
 import com.example.logisticstracking.infrastructure.httpclient.nagerdate.dto.NagerDateHolidayResponse;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.List;
+import static com.example.logisticstracking.domain.constants.PackageConstants.*;
 
 @Slf4j
 @Component
 public class ExternalApisGateway {
-
     private final NagerDateClient nagerDateClient;
     private final DogApiClient dogApiClient;
 
@@ -29,11 +29,11 @@ public class ExternalApisGateway {
 
         for (NagerDateHolidayResponse holiday : holidays) {
             if (holiday.getDate().equals(dateStr)) {
-                log.info("Data {} é feriado: {}", dateStr, holiday.getLocalName());
+                log.info(LOG_HOLIDAY_FOUND_TEMPLATE, dateStr, holiday.getLocalName());
                 return true;
             }
         }
-        log.info("Data {} NÃO é feriado no país={}", dateStr, countryCode);
+        log.info(LOG_HOLIDAY_NOT_FOUND_TEMPLATE, dateStr, countryCode);
         return false;
     }
 
@@ -41,9 +41,9 @@ public class ExternalApisGateway {
         DogFactResponse response = dogApiClient.getFacts(1);
         if (response.getFacts() != null && !response.getFacts().isEmpty()) {
             String fact = response.getFacts().get(0);
-            log.info("Fato de cachorro obtido: {}", fact);
+            log.info(LOG_DOG_FACT_OBTAINED_TEMPLATE, fact);
             return fact;
         }
-        return "Dogs are awesome!";
+        return DEFAULT_DOG_FACT_MESSAGE;
     }
 }

@@ -1,9 +1,16 @@
 package com.example.logisticstracking.infrastructure.httpclient.nagerdate.dto;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
+import lombok.*;
 
-@Data
-public class NagerDateHolidayResponse {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class NagerDateHolidayResponse implements Serializable {
     private String date;
     private String localName;
     private String name;
