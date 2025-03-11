@@ -13,7 +13,6 @@ public class TrackingEventMapper {
 
     public TrackingEventDTO toDTO(TrackingEventEntity entity) {
         return new TrackingEventDTO(
-                entity.getId(),
                 entity.getPackageEntity().getId(),
                 entity.getLocation(),
                 entity.getDescription(),

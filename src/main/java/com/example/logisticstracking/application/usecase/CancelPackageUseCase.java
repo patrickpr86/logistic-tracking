@@ -1,16 +1,21 @@
 package com.example.logisticstracking.application.usecase;
 
+import com.example.logisticstracking.domain.entity.Package;
 import com.example.logisticstracking.domain.enumeration.PackageStatus;
 import com.example.logisticstracking.domain.exception.InvalidStatusTransitionException;
 import com.example.logisticstracking.domain.exception.PackageNotFoundException;
+import com.example.logisticstracking.infrastructure.kafka.service.KafkaService;
+import com.example.logisticstracking.infrastructure.mapper.PackageMapper;
 import com.example.logisticstracking.infrastructure.persistence.entity.PackageEntity;
 import com.example.logisticstracking.infrastructure.persistence.entity.TrackingEventEntity;
 import com.example.logisticstracking.infrastructure.persistence.repository.PackageRepository;
 import com.example.logisticstracking.infrastructure.persistence.repository.TrackingEventRepository;
-import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static com.example.logisticstracking.domain.constants.PackageConstants.*;
 
@@ -20,14 +25,21 @@ public class CancelPackageUseCase {
 
     private final PackageRepository packageRepository;
     private final TrackingEventRepository trackingEventRepository;
+    private final KafkaService kafkaService;
 
-    public CancelPackageUseCase(PackageRepository packageRepository, TrackingEventRepository trackingEventRepository) {
+    public CancelPackageUseCase(
+            PackageRepository packageRepository,
+            TrackingEventRepository trackingEventRepository,
+            KafkaService kafkaService
+    ) {
         this.packageRepository = packageRepository;
         this.trackingEventRepository = trackingEventRepository;
+        this.kafkaService = kafkaService;
     }
 
     @Transactional
-    public PackageEntity execute(String packageId) {
+    @CacheEvict(value = "packages", allEntries = true)
+    public void execute(String packageId) {
         log.info(LOG_ATTEMPT_CANCEL_PACKAGE_TEMPLATE, packageId);
 
         PackageEntity entity = packageRepository.findById(packageId)
@@ -38,13 +50,12 @@ public class CancelPackageUseCase {
             throw new InvalidStatusTransitionException(PACKAGE_CANNOT_BE_CANCELED_MESSAGE);
         }
 
-        // Atualiza o status do pacote
         entity.setStatus(PackageStatus.CANCELLED);
         entity.setUpdatedAt(LocalDateTime.now());
         packageRepository.save(entity);
 
-        // Registra um evento de rastreamento informando o cancelamento
         TrackingEventEntity event = TrackingEventEntity.builder()
+                .id(UUID.randomUUID())
                 .packageEntity(entity)
                 .location(TRACKING_EVENT_CANCELLATION_LOCATION)
                 .description(TRACKING_EVENT_CANCELLATION_DESCRIPTION)
@@ -53,7 +64,15 @@ public class CancelPackageUseCase {
 
         trackingEventRepository.save(event);
 
+        sendPackageCanceledToKafka(entity.getId());
+
         log.info(LOG_PACKAGE_CANCELED_SUCCESS_TEMPLATE, packageId);
-        return entity;
     }
+
+    private void sendPackageCanceledToKafka(String packageId) {
+        String message = String.format(PACKAGE_CANCELED_KAFKA_MESSAGE, packageId);
+        kafkaService.sendTrackingEvent(message);
+        log.info(LOG_TRACKING_EVENT_SENT_TO_KAFKA_TEMPLATE, packageId, message);
+    }
+
 }

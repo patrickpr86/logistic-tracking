@@ -12,6 +12,8 @@ services:
     networks:
       - logistics-net
     restart: always
+    volumes:
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   kafka:
     image: landoop/fast-data-dev:latest

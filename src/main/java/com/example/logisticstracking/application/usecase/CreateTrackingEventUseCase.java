@@ -66,7 +66,6 @@ public class CreateTrackingEventUseCase {
         return trackingEventMapper.toDTO(savedEvent);
     }
 
-
     private void sendTrackingEventToKafka(String packageId, String description) {
         String message = String.format(TRACKING_EVENT_MESSAGE, packageId, description);
         kafkaService.sendTrackingEvent(message);

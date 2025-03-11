@@ -1,22 +1,25 @@
 package com.example.logisticstracking.application.dto;
 
-import com.example.logisticstracking.domain.enumeration.PackageStatus;
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
-public record PackageDetailsDTO(
-        String id,
-        String description,
-        String sender,
-        String recipient,
-        PackageStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        LocalDateTime deliveredAt,
-        boolean isHoliday,
-        String funFact,
-        LocalDateTime estimatedDeliveryDate,
-        List<TrackingEventDTO> events
-) implements Serializable {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class PackageDetailsDTO extends RepresentationModel<PackageDetailsDTO> {
+    private String id;
+    private String description;
+    private String sender;
+    private String recipient;
+    private String status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime estimatedDeliveryDate;
+    private List<TrackingEventDTO> trackingEvents;
 }

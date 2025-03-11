@@ -52,7 +52,7 @@ public class CreatePackageUseCase {
     public Package execute(PackageCreateRequestDTO dto) {
         log.info(LOG_START_PACKAGE_CREATION_TEMPLATE, dto.sender(), dto.recipient());
 
-        String pkgId = (dto.id() != null) ? dto.id() : PACKAGE_PREFIX_ID + UUID.randomUUID();
+        String pkgId = PACKAGE_PREFIX_ID + UUID.randomUUID();
 
         LocalDate estimatedDate = DateUtils.parseDate(
                 dto.estimatedDeliveryDate(),
@@ -105,8 +105,9 @@ public class CreatePackageUseCase {
     }
 
     private void sendPackageCreatedToKafka(String packageId) {
-        String message = String.format("Package %s created successfully", packageId);
+        String message = String.format(PACKAGE_CREATED_KAFKA_MESSAGE, packageId);
         kafkaService.sendTrackingEvent(message);
-        log.info("Sent package creation event to Kafka: {}", message);
+        log.info(LOG_TRACKING_EVENT_SENT_TO_KAFKA_TEMPLATE, packageId, message);
     }
+
 }

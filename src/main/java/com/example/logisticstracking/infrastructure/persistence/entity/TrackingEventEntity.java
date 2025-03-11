@@ -1,5 +1,6 @@
 package com.example.logisticstracking.infrastructure.persistence.entity;
 
+import com.example.logisticstracking.config.UUIDConverter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +18,8 @@ public class TrackingEventEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
+    @Convert(converter = UUIDConverter.class)
+    @Column(columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
 
     private String location;

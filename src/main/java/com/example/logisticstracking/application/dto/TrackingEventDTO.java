@@ -1,14 +1,21 @@
 package com.example.logisticstracking.application.dto;
 
-import java.io.Serializable;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public record TrackingEventDTO(
-        UUID id,
+        @NotBlank(message = "Package ID is required")
         String packageId,
+
+        @NotBlank(message = "Location is required")
         String location,
+
+        @NotBlank(message = "Description is required")
         String description,
+
+        @NotNull(message = "Date is required")
         LocalDateTime date
-) implements Serializable {
+) {
 }
+

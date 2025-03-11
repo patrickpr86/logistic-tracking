@@ -6,10 +6,11 @@ import com.example.logisticstracking.domain.entity.Package;
 import com.example.logisticstracking.domain.entity.TrackingEvent;
 import com.example.logisticstracking.infrastructure.persistence.entity.PackageEntity;
 import com.example.logisticstracking.infrastructure.persistence.entity.TrackingEventEntity;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Component;
 
 @Component
 public class PackageMapper {
@@ -27,7 +28,7 @@ public class PackageMapper {
                 .isHoliday(domain.isHoliday())
                 .funFact(domain.funFact())
                 .estimatedDeliveryDate(domain.estimatedDeliveryDate())
-                .trackingEvents(new ArrayList<>()) // ✅ lista inicializada corretamente
+                .trackingEvents(new ArrayList<>())
                 .build();
     }
 
@@ -49,39 +50,46 @@ public class PackageMapper {
     }
 
     public PackageDetailsDTO toDTO(Package domain) {
-        return new PackageDetailsDTO(
-                domain.id(),
-                domain.description(),
-                domain.sender(),
-                domain.recipient(),
-                domain.status(),
-                domain.createdAt(),
-                domain.updatedAt(),
-                domain.deliveredAt(),
-                domain.isHoliday(),
-                domain.funFact(),
-                domain.estimatedDeliveryDate(),
-                mapTrackingEventDTOs(domain.events())
-        );
+        return PackageDetailsDTO.builder()
+                .id(domain.id())
+                .description(domain.description())
+                .sender(domain.sender())
+                .recipient(domain.recipient())
+                .status(domain.status().name())
+                .createdAt(domain.createdAt())
+                .updatedAt(domain.updatedAt())
+                .estimatedDeliveryDate(domain.estimatedDeliveryDate())
+                .trackingEvents(mapTrackingEventDTOs(domain.events()))
+                .build();
     }
+
+    public PackageDetailsDTO toDTOWithoutEvents(Package domain) {
+        return PackageDetailsDTO.builder()
+                .id(domain.id())
+                .description(domain.description())
+                .sender(domain.sender())
+                .recipient(domain.recipient())
+                .status(domain.status().name())
+                .createdAt(domain.createdAt())
+                .updatedAt(domain.updatedAt())
+                .estimatedDeliveryDate(domain.estimatedDeliveryDate())
+                .build();
+    }
+
 
     public PackageDetailsDTO toDetailsDTO(PackageEntity entity, List<TrackingEventDTO> events) {
-        return new PackageDetailsDTO(
-                entity.getId(),
-                entity.getDescription(),
-                entity.getSender(),
-                entity.getRecipient(),
-                entity.getStatus(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt(),
-                entity.getDeliveredAt(),
-                entity.isHoliday(),
-                entity.getFunFact(),
-                entity.getEstimatedDeliveryDate(),
-                events
-        );
+        return PackageDetailsDTO.builder()
+                .id(entity.getId())
+                .description(entity.getDescription())
+                .sender(entity.getSender())
+                .recipient(entity.getRecipient())
+                .status(entity.getStatus().name())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .estimatedDeliveryDate(entity.getEstimatedDeliveryDate())
+                .trackingEvents(events)
+                .build();
     }
-
 
     private List<TrackingEvent> mapTrackingEvents(List<TrackingEventEntity> entities) {
         if (entities == null) return new ArrayList<>();
@@ -102,7 +110,6 @@ public class PackageMapper {
 
         return trackingEvents.stream()
                 .map(event -> new TrackingEventDTO(
-                        event.id(),
                         event.packageId(),
                         event.location(),
                         event.description(),

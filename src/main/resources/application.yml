@@ -2,9 +2,19 @@ server:
   port: 8080
 
 spring:
+  datasource:
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 50
+      idle-timeout: 20000
+      max-lifetime: 1740000
+      connection-timeout: 30000
+      leak-detection-threshold: 5000
+      validation-timeout: 5000
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -15,28 +25,52 @@ spring:
   redis:
     host: localhost
     port: 6379
-    timeout: 60000
+    timeout: 30000
     lettuce:
       pool:
-        max-active: 10
-        max-idle: 5
+        max-active: 20
+        max-idle: 10
         min-idle: 2
         max-wait: 2000ms
 
   kafka:
+    tracking:
+      topic-name: tracking-events
+      partitions: 3
+      replication-factor: 1
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: logistics-tracking-group
+      auto-offset-reset: latest
 
 logging:
   level:
     root: INFO
 
-#CLIENTS
+## ACTUATOR (Monitoramento)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+  metrics:
+    enable:
+      hikari: true  # 🔹 Habilita monitoramento do HikariCP
+  info:
+    env:
+      enabled: true
+    git:
+      mode: full
+
+## CLIENTS (APIs Externas)
 dog-api-client:
   name: dogApiClient
   url: https://dogapi.dog

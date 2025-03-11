@@ -1,6 +1,5 @@
 package com.example.logisticstracking.infrastructure.kafka.service;
 
-import com.example.logisticstracking.infrastructure.kafka.configuration.KafkaConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,7 @@ public class KafkaService {
     }
 
     public void sendTrackingEvent(String eventDescription) {
-        log.info("Enviando mensagem para tópico {}: {}", KafkaConfig.TRACKING_TOPIC, eventDescription);
-        kafkaTemplate.send(KafkaConfig.TRACKING_TOPIC, eventDescription);
+        log.info("Enviando mensagem para Kafka: {}", eventDescription);
+        kafkaTemplate.send("tracking-events", eventDescription);
     }
 }

@@ -18,7 +18,7 @@ import lombok.*;
 public class PackageEntity {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @Column(length = 50, nullable = false, updatable = false)
     private String id;
 
     private String description;
