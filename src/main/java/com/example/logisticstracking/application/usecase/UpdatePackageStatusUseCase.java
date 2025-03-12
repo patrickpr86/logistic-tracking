@@ -6,6 +6,7 @@ import com.example.logisticstracking.domain.enumeration.PackageStatus;
 import com.example.logisticstracking.domain.exception.InvalidStatusTransitionException;
 import com.example.logisticstracking.domain.exception.PackageNotFoundException;
 import com.example.logisticstracking.infrastructure.kafka.service.KafkaService;
+import com.example.logisticstracking.infrastructure.kafka.utils.SendMessageTemplate;
 import com.example.logisticstracking.infrastructure.mapper.PackageMapper;
 import com.example.logisticstracking.infrastructure.persistence.entity.PackageEntity;
 import com.example.logisticstracking.infrastructure.persistence.entity.TrackingEventEntity;
@@ -68,7 +69,7 @@ public class UpdatePackageStatusUseCase {
 
         registerTrackingEvent(entity, newStatus);
 
-        sendPackageStatusUpdatedToKafka(entity.getId(), newStatus);
+        sendPackageUpdatedToKafka(entity.getId(), newStatus);
 
         log.info(LOG_PACKAGE_STATUS_UPDATED_TEMPLATE, packageId, newStatus);
         return packageMapper.toDomain(entity);
@@ -88,7 +89,7 @@ public class UpdatePackageStatusUseCase {
         TrackingEventEntity trackingEvent = TrackingEventEntity.builder()
                 .id(UUID.randomUUID())
                 .packageEntity(packageEntity)
-                .location(TRACKING_EVENT_CANCELLATION_LOCATION)
+                .location(TRACKING_EVENT_LOCATION)
                 .description(PACKAGE_CREATED_DESCRIPTION + newStatus)
                 .date(LocalDateTime.now())
                 .build();
@@ -96,10 +97,8 @@ public class UpdatePackageStatusUseCase {
         trackingEventRepository.save(trackingEvent);
     }
 
-    private void sendPackageStatusUpdatedToKafka(String packageId, PackageStatus status) {
-        String message = String.format(PACKAGE_STATUS_UPDATED_KAFKA_MESSAGE, packageId, status);
-        kafkaService.sendTrackingEvent(message);
-        log.info(LOG_TRACKING_EVENT_SENT_TO_KAFKA_TEMPLATE, packageId, message);
+    private void sendPackageUpdatedToKafka(String packageId, PackageStatus newStatus) {
+        SendMessageTemplate.publishPackageStatusUpdate(packageId, newStatus, log, kafkaService);
     }
 
 }

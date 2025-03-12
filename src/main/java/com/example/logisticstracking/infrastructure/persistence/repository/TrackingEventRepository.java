@@ -10,7 +10,6 @@ import java.util.UUID;
 @Repository
 public interface TrackingEventRepository extends JpaRepository<TrackingEventEntity, UUID> {
 
-    List<TrackingEventEntity> findByPackageEntityId(String packageId);
     List<TrackingEventEntity> findByPackageEntityIdOrderByDateAsc(String packageEntityId);
 
 }

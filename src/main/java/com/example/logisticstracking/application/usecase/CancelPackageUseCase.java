@@ -1,11 +1,10 @@
 package com.example.logisticstracking.application.usecase;
 
-import com.example.logisticstracking.domain.entity.Package;
 import com.example.logisticstracking.domain.enumeration.PackageStatus;
 import com.example.logisticstracking.domain.exception.InvalidStatusTransitionException;
 import com.example.logisticstracking.domain.exception.PackageNotFoundException;
+import com.example.logisticstracking.infrastructure.kafka.dto.TrackingEventKafkaDTO;
 import com.example.logisticstracking.infrastructure.kafka.service.KafkaService;
-import com.example.logisticstracking.infrastructure.mapper.PackageMapper;
 import com.example.logisticstracking.infrastructure.persistence.entity.PackageEntity;
 import com.example.logisticstracking.infrastructure.persistence.entity.TrackingEventEntity;
 import com.example.logisticstracking.infrastructure.persistence.repository.PackageRepository;
@@ -57,7 +56,7 @@ public class CancelPackageUseCase {
         TrackingEventEntity event = TrackingEventEntity.builder()
                 .id(UUID.randomUUID())
                 .packageEntity(entity)
-                .location(TRACKING_EVENT_CANCELLATION_LOCATION)
+                .location(TRACKING_EVENT_LOCATION)
                 .description(TRACKING_EVENT_CANCELLATION_DESCRIPTION)
                 .date(LocalDateTime.now())
                 .build();
@@ -70,9 +69,22 @@ public class CancelPackageUseCase {
     }
 
     private void sendPackageCanceledToKafka(String packageId) {
-        String message = String.format(PACKAGE_CANCELED_KAFKA_MESSAGE, packageId);
-        kafkaService.sendTrackingEvent(message);
-        log.info(LOG_TRACKING_EVENT_SENT_TO_KAFKA_TEMPLATE, packageId, message);
+        TrackingEventKafkaDTO event = new TrackingEventKafkaDTO(
+                PackageStatus.CANCELLED,
+                packageId,
+                PACKAGE_CANCELED_KAFKA_MESSAGE.formatted(packageId)
+        );
+
+        log.info(LOG_SENDING_PACKAGE_EVENT_TO_KAFKA_TEMPLATE, event.getStatus(), packageId);
+
+        kafkaService.sendTrackingEvent(event)
+                .thenRun(() -> log.info(LOG_PACKAGE_CANCELED_KAFKA_TEMPLATE, packageId))
+                .exceptionally(ex -> {
+                    log.error(LOG_PACKAGE_EVENT_SEND_FAILURE_TEMPLATE, packageId, event, ex.getMessage(), ex);
+                    return null;
+                });
     }
+
+
 
 }

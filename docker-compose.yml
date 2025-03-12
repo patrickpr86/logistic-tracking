@@ -1,4 +1,22 @@
 services:
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_HEC_TOKEN: 00000000-0000-0000-0000-000000000000
+      SPLUNK_HEC_ENABLE: "true"
+      SPLUNK_PASSWORD: "Admin@123"
+    ports:
+      - "8000:8000"
+      - "8088:8088"
+      - "8089:8089"
+    volumes:
+      - splunk-data:/opt/splunk/var
+    networks:
+      - logistics-net
+    restart: always
+
   mysql:
     image: mysql:8.0
     container_name: mysql_db
@@ -38,27 +56,27 @@ services:
       - logistics-net
     restart: always
 
-  logistics-tracking:
-    build: .
-    container_name: logistics-tracking-app
-    depends_on:
-      - mysql
-      - kafka
-      - redis
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/logistics_db
-      SPRING_DATASOURCE_USERNAME: logistics_user
-      SPRING_DATASOURCE_PASSWORD: logistics_password
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-    ports:
-      - "8080:8080"
-    networks:
-      - logistics-net
-    restart: always
+#  logistics-tracking:
+#    build: .
+#    container_name: logistics-tracking-app
+#    depends_on:
+#      - mysql
+#      - kafka
+#      - redis
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/logistics_db
+#      SPRING_DATASOURCE_USERNAME: logistics_user
+#      SPRING_DATASOURCE_PASSWORD: logistics_password
+#      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+#      SPRING_REDIS_HOST: redis
+#      SPRING_REDIS_PORT: 6379
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - logistics-net
+#    restart: always
 
   redis:
     image: redis:latest
@@ -78,3 +96,4 @@ networks:
 
 volumes:
   redis-data:
+  splunk-data:

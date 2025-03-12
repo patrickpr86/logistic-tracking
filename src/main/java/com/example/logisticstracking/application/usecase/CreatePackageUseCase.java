@@ -4,6 +4,7 @@ import com.example.logisticstracking.application.dto.PackageCreateRequestDTO;
 import com.example.logisticstracking.domain.entity.Package;
 import com.example.logisticstracking.domain.enumeration.PackageStatus;
 import com.example.logisticstracking.infrastructure.httpclient.resolver.ExternalApisResolver;
+import com.example.logisticstracking.infrastructure.kafka.dto.TrackingEventKafkaDTO;
 import com.example.logisticstracking.infrastructure.kafka.service.KafkaService;
 import com.example.logisticstracking.infrastructure.mapper.PackageMapper;
 import com.example.logisticstracking.infrastructure.persistence.entity.PackageEntity;
@@ -105,9 +106,20 @@ public class CreatePackageUseCase {
     }
 
     private void sendPackageCreatedToKafka(String packageId) {
-        String message = String.format(PACKAGE_CREATED_KAFKA_MESSAGE, packageId);
-        kafkaService.sendTrackingEvent(message);
-        log.info(LOG_TRACKING_EVENT_SENT_TO_KAFKA_TEMPLATE, packageId, message);
+        TrackingEventKafkaDTO event = new TrackingEventKafkaDTO(
+                PackageStatus.CREATED,
+                packageId,
+                PACKAGE_CREATED_KAFKA_MESSAGE.formatted(packageId)
+        );
+
+        log.info(LOG_SENDING_PACKAGE_EVENT_TO_KAFKA_TEMPLATE, event.getStatus(), packageId);
+
+        kafkaService.sendTrackingEvent(event)
+                .thenRun(() -> log.info(LOG_PACKAGE_CREATED_KAFKA_TEMPLATE, packageId))
+                .exceptionally(ex -> {
+                    log.error(LOG_PACKAGE_EVENT_SEND_FAILURE_TEMPLATE, packageId, event, ex.getMessage(), ex);
+                    return null;
+                });
     }
 
 }

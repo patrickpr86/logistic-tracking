@@ -28,6 +28,7 @@ public class PackageEntity {
     @Enumerated(EnumType.STRING)
     private PackageStatus status;
 
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deliveredAt;
@@ -40,6 +41,7 @@ public class PackageEntity {
 
     @OneToMany(mappedBy = "packageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("packageEntity")
+    @Builder.Default
     private List<TrackingEventEntity> trackingEvents = new ArrayList<>();
 }
 

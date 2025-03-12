@@ -33,42 +33,38 @@ spring:
         min-idle: 2
         max-wait: 2000ms
 
-  kafka:
-    tracking:
-      topic-name: tracking-events
-      partitions: 3
-      replication-factor: 1
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: all
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
-    consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: logistics-tracking-group
-      auto-offset-reset: latest
-
 logging:
   level:
     root: INFO
+    com.example.logisticstracking: DEBUG
+  config: classpath:logback-spring.xml
+
+splunk:
+  url: http://localhost:8088
+  token: 00000000-0000-0000-0000-000000000000
+  index: main
+  source: logistic-tracking
+  sourcetype: _json
 
 ## ACTUATOR (Monitoramento)
 management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true
   endpoints:
     web:
       exposure:
-        include: health,metrics,info
+        include: prometheus,health,metrics,info
   metrics:
     enable:
-      hikari: true  # 🔹 Habilita monitoramento do HikariCP
+      hikari: true
   info:
     env:
       enabled: true
     git:
       mode: full
+
 
 ## CLIENTS (APIs Externas)
 dog-api-client:

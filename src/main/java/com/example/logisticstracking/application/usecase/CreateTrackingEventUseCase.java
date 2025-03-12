@@ -2,8 +2,10 @@ package com.example.logisticstracking.application.usecase;
 
 import com.example.logisticstracking.application.dto.TrackingEventDTO;
 import com.example.logisticstracking.application.dto.TrackingEventRequestDTO;
+import com.example.logisticstracking.domain.enumeration.PackageStatus;
 import com.example.logisticstracking.domain.exception.PackageNotFoundException;
 import com.example.logisticstracking.infrastructure.kafka.service.KafkaService;
+import com.example.logisticstracking.infrastructure.kafka.utils.SendMessageTemplate;
 import com.example.logisticstracking.infrastructure.mapper.TrackingEventMapper;
 import com.example.logisticstracking.infrastructure.persistence.entity.PackageEntity;
 import com.example.logisticstracking.infrastructure.persistence.entity.TrackingEventEntity;
@@ -16,7 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.logisticstracking.domain.constants.PackageConstants.*;
+import static com.example.logisticstracking.domain.constants.PackageConstants.LOG_CREATING_TRACKING_EVENT_TEMPLATE;
+import static com.example.logisticstracking.domain.constants.PackageConstants.LOG_TRACKING_EVENT_CREATED_SUCCESS_TEMPLATE;
 
 @Slf4j
 @Service
@@ -58,17 +61,15 @@ public class CreateTrackingEventUseCase {
 
         TrackingEventEntity savedEvent = trackingEventRepository.save(trackingEventEntity);
 
-
-        sendTrackingEventToKafka(packageEntity.getId(), savedEvent.getDescription());
+        sendEventTrackingUpdatedToKafka(packageEntity.getId(), packageEntity.getStatus());
 
         log.info(LOG_TRACKING_EVENT_CREATED_SUCCESS_TEMPLATE, savedEvent.getId(), packageEntity.getId());
 
         return trackingEventMapper.toDTO(savedEvent);
     }
 
-    private void sendTrackingEventToKafka(String packageId, String description) {
-        String message = String.format(TRACKING_EVENT_MESSAGE, packageId, description);
-        kafkaService.sendTrackingEvent(message);
-        log.info(LOG_TRACKING_EVENT_SENT_TO_KAFKA_TEMPLATE, packageId, message);
+    private void sendEventTrackingUpdatedToKafka(String packageId, PackageStatus newStatus) {
+        SendMessageTemplate.publishPackageStatusUpdate(packageId, newStatus, log, kafkaService);
     }
+
 }

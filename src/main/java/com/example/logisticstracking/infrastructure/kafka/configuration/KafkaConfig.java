@@ -1,34 +1,49 @@
 package com.example.logisticstracking.infrastructure.kafka.configuration;
 
+import com.example.logisticstracking.infrastructure.kafka.dto.TrackingEventKafkaDTO;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.kafka.core.*;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
-/**
- * Kafka configuration class responsible for topic creation.
- */
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
-@DependsOn("kafkaAdmin")
 public class KafkaConfig {
 
-    @Value("${kafka.tracking.topic-name}")
-    private String trackingTopicName;
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
-    @Value("${kafka.tracking.partitions}")
-    private int trackingTopicPartitions;
+    private static final String TRACKING_TOPIC = "tracking-events";
+    private static final String DEAD_LETTER_TOPIC = "tracking-events-dlt";
 
-    @Value("${kafka.tracking.replication-factor}")
-    private int trackingTopicReplication;
-
-    /**
-     * Creates a Kafka topic for tracking events using externalized configuration.
-     *
-     * @return A configured NewTopic instance.
-     */
     @Bean
-    public NewTopic createTrackingTopic() {
-        return new NewTopic(trackingTopicName, trackingTopicPartitions, (short) trackingTopicReplication);
+    public NewTopic trackingTopic() {
+        return new NewTopic(TRACKING_TOPIC, 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic deadLetterTopic() {
+        return new NewTopic(DEAD_LETTER_TOPIC, 3, (short) 1);
+    }
+
+    @Bean
+    public ProducerFactory<String, TrackingEventKafkaDTO> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9093");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        configProps.put(ProducerConfig.ACKS_CONFIG, "all");
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, TrackingEventKafkaDTO> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
     }
 }

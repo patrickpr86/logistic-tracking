@@ -57,6 +57,16 @@ public class PackageConstants {
     public static final String LOG_FETCH_PACKAGE_DETAILS_TEMPLATE = "m=execute Fetching package details for package={}, includeEvents={}";
     public static final String LOG_PACKAGE_DETAILS_FETCHED_TEMPLATE = "m=execute Package details fetched successfully for package={}";
 
+    // LOGGING FOR KAFKA EVENTS
+    public static final String LOG_SENDING_PACKAGE_EVENT_TO_KAFKA_TEMPLATE = "m=sendPackageEventToKafka Sending event={} to Kafka. packageId={}";
+    public static final String LOG_PACKAGE_EVENT_SENT_SUCCESS_TEMPLATE = "m=sendPackageEventToKafka Event successfully sent. packageId={}, event={}";
+    public static final String LOG_PACKAGE_EVENT_SEND_FAILURE_TEMPLATE = "m=sendPackageEventToKafka Failed to send event to Kafka. packageId={}, event={}, error={}";
+
+    // SPECIFIC LOGS FOR EACH EVENT
+    public static final String LOG_PACKAGE_CANCELED_KAFKA_TEMPLATE = "m=sendPackageCanceledToKafka Package cancellation event sent to Kafka. packageId={}";
+    public static final String LOG_PACKAGE_CREATED_KAFKA_TEMPLATE = "m=sendPackageCreatedToKafka Package creation event sent to Kafka. packageId={}";
+    public static final String LOG_PACKAGE_UPDATED_KAFKA_TEMPLATE = "m=sendPackageUpdatedToKafka Package status updated and sent to Kafka. packageId={}, newStatus={}";
+
 
     public static final String LOG_HOLIDAY_FOUND_TEMPLATE = "m=execute Date {} is a holiday: {}";
     public static final String LOG_HOLIDAY_NOT_FOUND_TEMPLATE = "m=execute Date {} is NOT a holiday in country={}";
@@ -65,7 +75,7 @@ public class PackageConstants {
     public static final String LOG_TRACKING_EVENT_SENT_TO_KAFKA_TEMPLATE = "m=sendTrackingEventToKafka Tracking event sent to Kafka for package={}: {}";
 
     // CANCELLATION
-    public static final String TRACKING_EVENT_CANCELLATION_LOCATION = "System";
+    public static final String TRACKING_EVENT_LOCATION = "System";
     public static final String TRACKING_EVENT_CANCELLATION_DESCRIPTION = "Package canceled before shipment";
 
     // MESSAGES
