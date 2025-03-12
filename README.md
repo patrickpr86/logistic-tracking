@@ -66,23 +66,21 @@ Este projeto consiste em uma aplicação **Spring Boot 3.0.1** em **Java 17** qu
 - Java 17 e Maven instalados.
 
 ### **Passos**
-1. Clone o repositório:
+Clone o repositório:
+git clone https://github.com/patrickpr86/logistic-tracking.git
+cd logistic-tracking
 
+Inicie os containers (MySQL, Redis, Kafka, etc.):
+docker-compose up -d
 
-2. Inicie os containers:
-   ```sh
-   docker-compose up -d
-   ```
+Compile e rode a aplicação:
+./gradlew build
+java -jar build/libs/logistic-tracking.jar
 
-3. Compile e rode a aplicação:
-   ```sh
-   mvn clean package
-   java -jar target/app.jar
-   ```
+Acesse a API em:
+http://localhost:8080/
 
-4. Acesse a API em:
-   ```
-   http://localhost:8080/
-   ```
+Acesse a documentação Swagger:
+http://localhost:8080/swagger-ui.html
 
 ---
